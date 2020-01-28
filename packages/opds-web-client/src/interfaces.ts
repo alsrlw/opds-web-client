@@ -117,7 +117,7 @@ export interface StateProps {
 }
 
 export interface PathFor {
-  (collectionUrl: string, bookUrl: string): string;
+  (collectionUrl?: string, bookUrl?: string): string;
 }
 
 export interface FetchErrorData {
@@ -132,9 +132,12 @@ export interface Location {
 }
 
 export interface Router {
-  push: (location: string|Location) => any;
-  createHref: (location: string|Location) => string;
-  isActive: (location: string|Location, onlyActiveOnIndex?: boolean) => boolean;
+  push: (location: string | Location) => any;
+  createHref: (location: string | Location) => string;
+  isActive: (
+    location: string | Location,
+    onlyActiveOnIndex?: boolean
+  ) => boolean;
 }
 
 export interface NavigateContext {
@@ -160,7 +163,7 @@ export interface AuthProvider<T extends AuthMethod> {
 export interface AuthMethod {
   type: string;
   description?: string;
-};
+}
 
 export interface AuthData {
   showForm: boolean;

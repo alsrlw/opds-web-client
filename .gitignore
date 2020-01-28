@@ -1,5 +1,6 @@
 # Dependency directory
 packages/**/node_modules
+node_modules
 
 # Compiled JS directory
 packages/opds-web-client/lib
@@ -7,8 +8,8 @@ packages/opds-web-client/lib
 # Bundled JS
 dist
 
-# TypeScript definitions
-packages/opds-web-client/typings/*
+# TypeScript Docs
+packages/opds-web-client/docs
 
 # Temporary files
 *~

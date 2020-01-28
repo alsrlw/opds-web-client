@@ -1,14 +1,15 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { PropTypes } from "prop-types";
+import * as PropTypes from "prop-types";
 import { Router, Route, browserHistory } from "react-router";
 import OPDSCatalog from "./components/OPDSCatalog";
 import { RootProps } from "./components/Root";
 import { PathFor } from "./interfaces";
 import AuthPlugin from "./AuthPlugin";
 import "./stylesheets/app.scss";
+import PathForProvider from "./components/context/PathForContext";
 
-const OPDSCatalogRouterHandler = (config) => {
+const OPDSCatalogRouterHandler = config => {
   interface OPDSCatalogParams {
     collectionUrl: string;
     bookUrl: string;
@@ -17,19 +18,10 @@ const OPDSCatalogRouterHandler = (config) => {
     params?: OPDSCatalogParams;
   }
   class OPDSCatalogRoute extends React.Component<OPDSCatalogProps, {}> {
-    static contextTypes: {
+    static contextTypes = {
       router: PropTypes.object.isRequired
     };
 
-    static childContextTypes: React.ValidationMap<{}> = {
-      pathFor: PropTypes.func.isRequired
-    };
-
-    getChildContext() {
-      return {
-        pathFor: config.pathFor,
-      };
-    }
     render() {
       let { collectionUrl, bookUrl } = this.props.params;
       let mergedProps: RootProps = {
@@ -37,8 +29,12 @@ const OPDSCatalogRouterHandler = (config) => {
         collectionUrl,
         bookUrl
       };
-      return <OPDSCatalog {...mergedProps} />;
-    };
+      return (
+        <PathForProvider pathFor={config.pathFor}>
+          <OPDSCatalog {...mergedProps} />
+        </PathForProvider>
+      );
+    }
   }
 
   return OPDSCatalogRoute;
@@ -50,22 +46,38 @@ class OPDSWebClient {
   pathPattern: string;
   RouteHandler: any;
 
-  constructor(config: {
-    headerTitle?: string;
-    proxyUrl?: string;
-    authPlugins?: AuthPlugin[];
-    pageTitleTemplate?: (collectionTitle: string, bookTitle: string) => string;
-    pathPattern?: string;
-    pathFor: PathFor;
-  }, elementId: string) {
+  constructor(
+    config: {
+      headerTitle?: string;
+      proxyUrl?: string;
+      authPlugins?: AuthPlugin[];
+      pageTitleTemplate?: (
+        collectionTitle: string,
+        bookTitle: string
+      ) => string;
+      pathPattern?: string;
+      pathFor: PathFor;
+    },
+    elementId: string
+  ) {
     this.elementId = elementId;
-    this.pathPattern = config.pathPattern || "/(collection/:collectionUrl/)(book/:bookUrl/)";
+    this.pathPattern =
+      config.pathPattern || "/(collection/:collectionUrl/)(book/:bookUrl/)";
     this.RouteHandler = OPDSCatalogRouterHandler(config);
     this.render();
   }
 
   render() {
     let RouteHandler = this.RouteHandler;
+
+    // `react-axe` should only run in development and testing mode.
+    // Running this is resource intensive and should only be used to test
+    // for accessibility and not during active development.
+    if (process.env.TEST_AXE === "true") {
+      let axe = require("react-axe");
+      axe(React, ReactDOM, 1000);
+    }
+
     ReactDOM.render(
       <Router history={browserHistory}>
         <Route path={this.pathPattern} component={RouteHandler} />
